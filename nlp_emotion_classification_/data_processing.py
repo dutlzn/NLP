@@ -13,7 +13,7 @@ min_seq = 1
 top_k = 1000
 
 pd_all = pd.read_csv(data_path)
-stop_words = open(stop_path).readlines()
+stop_words = open(stop_path, encoding='utf-8').readlines()
 stop_words = [line.strip() for line in stop_words]
 stop_words.append(" ")
 stop_words.append("\n")
@@ -27,7 +27,7 @@ print('评论负面数目: {}'.format(pd_all[pd_all.label == 1].shape[0]))
 print('-------------------------------')
 
 # get dict by jieba & hit_stopwords
-data_list = open(data_path).readlines()[1:]
+data_list = open(data_path, encoding='utf-8').readlines()[1:]
 for item in data_list:
     label = item[0]
     content = item[2:].strip()

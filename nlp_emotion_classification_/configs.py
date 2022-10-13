@@ -25,7 +25,8 @@ class config():
         self.dropout = 0.8
         self.pad_size = 32
         self.num_classes = 2
-        self.devices = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # self.devices = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.devices = 'cpu'
         self.batch_size = 128
         self.shuffle = True
         self.learning_rate = 0.001

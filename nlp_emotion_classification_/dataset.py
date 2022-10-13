@@ -13,7 +13,7 @@ stop_words_path = './data/hit_stopword'
 
 def read_dict(voc_dict_path):
     voc_dict = {}
-    dict_list = open(voc_dict_path).readlines()
+    dict_list = open(voc_dict_path, encoding='utf-8').readlines()
     for item in dict_list:
         item = item.split(',')
         try:
@@ -24,8 +24,8 @@ def read_dict(voc_dict_path):
 
 
 def load_data(data_path, data_stop_path):
-    data_list = open(data_path).readlines()[1:]
-    stop_words = open(data_stop_path).readlines()
+    data_list = open(data_path, encoding='utf-8').readlines()[1:]
+    stop_words = open(data_stop_path, encoding='utf-8').readlines()
     stop_words = [line.strip() for line in stop_words]
     stop_words.append(" ")
     stop_words.append("\n")
@@ -89,7 +89,7 @@ class text_CLS(Dataset):
         # 如果序列长度不够就补齐
         if len(input_idx) < self.max_len_seq:
             input_idx += [self.voc_dict["<PAD>"] for _ in range(self.max_len_seq - len(input_idx))]
-        input_idx = np.array(input_idx)
+        input_idx = np.array(input_idx).astype(np.long)
         return label, input_idx
 
 """

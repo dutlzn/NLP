@@ -28,6 +28,7 @@ class Model(nn.Module):
 
         self.softmax = nn.Softmax(dim=1)
     def forward(self, x):
+        x = x.to(torch.int64)
         embed = self.embedding(x) # batch_size * seq_len * embed_size
         out, _ = self.lstm(embed)
         out = torch.cat([out, embed], 2)
