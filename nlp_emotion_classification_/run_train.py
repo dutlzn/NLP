@@ -35,3 +35,5 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
         print('epoch: {}, train_loss:{}'.format(epoch + 1, train_loss / len(train_loader.dataset)))
+
+        torch.save(model_text_cls.state_dict(), "./data/model_{}.pth".format(epoch))
