@@ -12,12 +12,13 @@ if __name__ == '__main__':
     dict_path = '../data/dict'
     dataset = text_CLS(dict_path, data_path, data_stop_path)
     cfg.pad_size = dataset.max_len_seq
+    print(cfg.pad_size)
     train_loader = data_loader(dataset, cfg)
     model_text_cls = Model(config=cfg)
-    model_text_cls.load_state_dict(torch.load('./data/model_9.pth'))
+    model_text_cls.load_state_dict(torch.load('../data/model.pth'))
     model_text_cls.to(cfg.devices)
 
-    train_loss = 0.0
+    sum = 0
     for i, batch in enumerate(train_loader):
         label, data = batch
         label = torch.tensor(label, dtype=torch.int64).to(cfg.devices)
@@ -25,6 +26,7 @@ if __name__ == '__main__':
         out = model_text_cls(data)
         pred = torch.argmax(out, dim=1)
         out = torch.eq(pred, label)
-        print(out.sum() * 1.0 / pred.size()[0])
+        sum += out.sum() * 1.0
+    print(sum / len(train_loader.dataset))
         # pred = torch.argmax(out)
         # print(pred, label)

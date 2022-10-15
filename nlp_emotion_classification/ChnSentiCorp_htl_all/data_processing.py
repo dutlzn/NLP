@@ -9,7 +9,7 @@ import jieba
 4、对应词频折算成0~K索引，然后保存词典
 """
 
-data_path = '../data/ChnSentiCorp_htl_all.csv'
+data_path = '../data/weibo_senti_100k.csv'
 stop_words_path = '../data/hit_stopword'
 UNK = "<UNK>"
 PAD = "<PAD>"

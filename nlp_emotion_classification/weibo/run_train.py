@@ -12,6 +12,7 @@ if __name__ == '__main__':
     dict_path = '../data/dict'
     dataset = text_CLS(dict_path, data_path, data_stop_path)
     cfg.pad_size = dataset.max_len_seq
+    print(cfg.pad_size)
     train_loader = data_loader(dataset, cfg)
     model_text_cls = Model(config=cfg)
     model_text_cls.to(cfg.devices)
@@ -37,4 +38,4 @@ if __name__ == '__main__':
         print('epoch: {}, train_loss:{}'.format(epoch + 1, train_loss / len(train_loader.dataset)))
 
         # torch.save(model_text_cls.state_dict(), "./data/model_{}.pth".format(epoch))
-        torch.save(model_text_cls.state_dict(), './data/model.pth')
+        torch.save(model_text_cls.state_dict(), '../data/model.pth')
