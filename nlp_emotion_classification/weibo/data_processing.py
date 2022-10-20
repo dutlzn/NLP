@@ -1,59 +1,49 @@
-"""
-data processing:
-    create dict include emotion label and review
-"""
+import numpy as np
 import pandas as pd
 import jieba
 
-data_path = r'../data/weibo_senti_100k.csv'
-stop_path = r'../data/hit_stopword'
+data_path = './data/weibo_senti_100k.csv'
+stop_words_path = './data/hit_stopword'
 
-voc_dict = {}
-min_seq = 1
-top_k = 1000
+data_list = open(data_path, 'r', encoding='UTF-8').readlines()[1:]
+stop_words_list = open(stop_words_path, 'r', encoding='UTF-8').readlines()
+stop_words_list = [item.strip() for item in stop_words_list]
+stop_words_list.append("\t")
+stop_words_list.append(" ")
 
-pd_all = pd.read_csv(data_path)
-stop_words = open(stop_path, encoding='utf-8').readlines()
-stop_words = [line.strip() for line in stop_words]
-stop_words.append(" ")
-stop_words.append("\n")
+vic_dict = {}
 
-
-# data visual
-print(pd_all.head(3))
-print('评论数目: {}'.format(pd_all.shape[0]))
-print('评论正面数目: {}'.format(pd_all[pd_all.label == 0].shape[0]))
-print('评论负面数目: {}'.format(pd_all[pd_all.label == 1].shape[0]))
-print('-------------------------------')
-
-# get dict by jieba & hit_stopwords
-data_list = open(data_path, encoding='utf-8').readlines()[1:]
 for item in data_list:
     label = item[0]
     content = item[2:].strip()
-    seg_list = jieba.cut(content, cut_all=False)
+    seg_list = jieba.lcut(content, cut_all=False)
     for seg_item in seg_list:
-        if seg_item in stop_words:
+        if seg_item in stop_words_list:
             continue
-        if seg_item in voc_dict.keys():
-            voc_dict[seg_item] += 1
+
+        if seg_item in vic_dict.keys():
+            vic_dict[seg_item] += 1
         else:
-            voc_dict[seg_item] = 1
-
-# sort
-voc_list = sorted([_ for _ in voc_dict.items() if _[1] > min_seq],
-                  key=lambda x : x[1],
-                  reverse=True)[:top_k]
-print(voc_list[:20])
+            vic_dict[seg_item] = 0
 
 
-UNK = '<UNK>'
-PAD = '<PAD>'
+top_K = 1000
+vic_dict = sorted([item for item in vic_dict.items()],
+                  key=lambda x:x[1],
+                  reverse=True)[:top_K]
+vic_dict = {item[0]: idx for idx, item in enumerate(vic_dict)}
+# 未出现在词典中的单词
+UNK = "<UNK>"
+# 当句子分词长度不够时候的填充
+PAD = "<PAD>"
 
-voc_dict = {data[0]: idx for idx, data in enumerate(voc_list)}
-voc_dict.update({UNK: len(voc_dict), PAD: len(voc_dict) + 1})
+vic_dict.update({UNK: len(vic_dict),
+                 PAD: len(vic_dict)+1})
 
-ff = open('../data/dict', 'w', encoding='utf-8')
 
-for item in voc_dict.items():
-    ff.writelines("{},{}\n".format(item[0], item[1]))
+ff = open('./data/dict', 'w', encoding='UTF-8')
+
+for item in vic_dict.items():
+    ff.writelines("{}:{}\n".format(item[0], item[1]))
+
+ff.close()

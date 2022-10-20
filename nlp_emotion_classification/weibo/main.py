@@ -1,16 +1,64 @@
-# This is a sample Python script.
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from transformer import Transformer
+from rnn import Rnn
+from configs import config
+import warnings
+import random
+import numpy as np
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from datasets import TextDatasets
+
+from torch.utils.data import DataLoader
+warnings.filterwarnings('ignore')
+
+# 设置随机种子
+def setup_seed(seed):
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    setup_seed(1)
+    cfg = config()
+    data_path = './data/weibo_senti_100k.csv'
+    data_stop_path = './data/hit_stopword'
+    dict_path = './data/dict'
+    dataset = TextDatasets(data_path, data_stop_path, dict_path, cfg)
+    train_loader = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=cfg.shuffle)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # model_text_cls = Transformer(cfg)
+    model_text_cls = Rnn(cfg)
+    loss_fun = nn.CrossEntropyLoss()
+    loss_fun.to(cfg.devices)
+    optimizer = optim.Adam(model_text_cls.parameters(), lr=cfg.learning_rate)
+    # 开启训练
+    model_text_cls.to(cfg.devices)
+    model_text_cls.train()
+    for epoch in range(cfg.num_epochs):
+        train_loss = 0.0
+        for i, batch in enumerate(train_loader):
+            data, label = batch
+            label = torch.tensor(label, dtype=torch.int64).to(cfg.devices)
+            data = torch.tensor(data, dtype=torch.int64).to(cfg.devices)
+
+            input_pad = 1001
+            input_mask = (data != input_pad)
+            optimizer.zero_grad()
+            # out, _, _ = model_text_cls(data, input_mask)
+            out = model_text_cls(data)
+            loss = loss_fun(out, label)
+            train_loss += loss.item()
+
+            loss.backward()
+            optimizer.step()
+
+        print('epoch: {}, train_loss:{}'.format(epoch + 1, train_loss / len(train_loader.dataset)))
+
+        # torch.save(model_text_cls.state_dict(), "./data/model_{}.pth".format(epoch))
+        torch.save(model_text_cls.state_dict(), '../data/rnn.pth')
